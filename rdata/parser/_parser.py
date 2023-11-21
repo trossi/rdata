@@ -27,6 +27,7 @@ from typing import (
 import numpy as np
 import numpy.typing as npt
 
+
 R_INT_NA = -2**31  # noqa: WPS432
 """Value used to represent a missing integer in R."""
 
@@ -1255,9 +1256,19 @@ def parse_rdata_binary(
             expand_altrep=expand_altrep,
             altrep_constructor_dict=altrep_constructor_dict,
         )
-        return parser.parse_all()
+    elif format_type is RdataFormats.ASCII:
+        from rdata.io.ascii import ParserASCII
 
-    raise NotImplementedError("Unknown file format")
+        parser = ParserASCII(
+            io.TextIOWrapper(io.BytesIO(data), encoding='ascii'),
+            expand_altrep=expand_altrep,
+            altrep_constructor_dict=altrep_constructor_dict,
+        )
+    else:
+        raise NotImplementedError("Unknown file format")
+
+    return parser.parse_all()
+
 
 
 def bits(data: int, start: int, stop: int) -> int:

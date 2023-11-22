@@ -136,18 +136,19 @@ class RdataFormats(enum.Enum):
 
 
 format_dict: Final = MappingProxyType({
-    RdataFormats.XDR: b"X\n",
-    RdataFormats.ASCII: b"A\n",
-    RdataFormats.binary: b"B\n",
+    RdataFormats.XDR: (b"X\n",),
+    RdataFormats.ASCII: (b"A\n", b"A\r\n",),
+    RdataFormats.binary: (b"B\n",),
 })
 
 
 def rdata_format(data: memoryview) -> RdataFormats | None:
-    """Return the format of the data."""
-    for format_type, magic in format_dict.items():
-        if data[:len(magic)] == magic:
-            return format_type
-    return None
+    """Return the format of the data and the matching magic bytes."""
+    for format_type, magics in format_dict.items():
+        for magic in magics:
+            if data[:len(magic)] == magic:
+                return format_type, magic
+    return None, None
 
 
 class RObjectType(enum.Enum):
@@ -1243,10 +1244,10 @@ def parse_rdata_binary(
     extension: str | None = None,
 ) -> RData:
     """Select the appropiate parser and parse all the info."""
-    format_type = rdata_format(data)
+    format_type, magic_bytes = rdata_format(data)
 
     if format_type:
-        data = data[len(format_dict[format_type]):]
+        data = data[len(magic_bytes):]
 
     if format_type is RdataFormats.XDR:
         from rdata.io.xdr import ParserXDR

@@ -661,7 +661,7 @@ class Parser(abc.ABC):
 
     def parse_nullable_bool_array(
         self,
-        fill_value: bool = True,
+        fill_value: bool = False,
     ) -> npt.NDArray[np.bool_] | np.ma.MaskedArray[Any, Any]:
         """Parse a boolean array."""
         return self.parse_nullable_int_array(fill_value).astype(np.bool_)

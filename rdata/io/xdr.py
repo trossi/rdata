@@ -71,7 +71,7 @@ class ParserXDR(Parser):
 
     def parse_nullable_int_array(
         self,
-        fill_value: int = R_INT_NA,
+        fill_value: int = 0,
     ) -> npt.NDArray[np.int32] | np.ma.MaskedArray[Any, Any]:  # noqa: D102
 
         data = self._parse_array(np.int32)

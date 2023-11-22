@@ -16,7 +16,6 @@ from rdata.parser._parser import (
 )
 
 
-
 R_INT_NA = -2**31  # noqa: WPS432
 """Value used to represent a missing integer in R."""
 
@@ -56,6 +55,13 @@ class ParserXDR(Parser):
 
     def parse_int(self) -> int:  # noqa: D102
         return int(self._parse_array_values(np.int32, 1)[0])
+
+    def parse_nullable_int(self) -> int | None:  # noqa: D102
+        value = self.parse_int()
+        if value == R_INT_NA:
+            return None
+        else:
+            return value
 
     def parse_double(self) -> float:  # noqa: D102
         return float(self._parse_array_values(np.float64, 1)[0])

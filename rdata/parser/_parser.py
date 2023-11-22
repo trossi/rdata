@@ -28,10 +28,6 @@ import numpy as np
 import numpy.typing as npt
 
 
-R_INT_NA = -2**31  # noqa: WPS432
-"""Value used to represent a missing integer in R."""
-
-
 @runtime_checkable
 class BinaryFileLike(Protocol):
     """Protocol for binary files."""
@@ -548,10 +544,10 @@ class Parser(abc.ABC):
         """Parse an integer."""
         pass
 
+    @abc.abstractmethod
     def parse_nullable_int(self) -> int | None:  # noqa: D102
-        result = self.parse_int()
-
-        return None if result == R_INT_NA else result
+        """Parse an integer."""
+        pass
 
     @abc.abstractmethod
     def parse_double(self) -> float:
@@ -672,7 +668,7 @@ class Parser(abc.ABC):
 
     def parse_nullable_int_array(
         self,
-        fill_value: int = R_INT_NA,
+        fill_value: int = 0,
     ) -> npt.NDArray[np.int32] | np.ma.MaskedArray[Any, Any]:
         """Parse an integer array."""
 

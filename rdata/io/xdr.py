@@ -53,11 +53,8 @@ class ParserXDR(Parser):
         # Read in big-endian order and convert to native byte order
         return np.frombuffer(buffer, dtype=dtype.newbyteorder('>')).astype(dtype, copy=False)
 
-    def parse_int(self) -> int:  # noqa: D102
-        return int(self._parse_array_values(np.int32, 1)[0])
-
     def parse_nullable_int(self) -> int | None:  # noqa: D102
-        value = self.parse_int()
+        value = int(self._parse_array_values(np.int32, 1)[0])
         if value == R_INT_NA:
             return None
         else:

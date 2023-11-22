@@ -539,10 +539,12 @@ class Parser(abc.ABC):
 
         return bool(read_value)
 
-    @abc.abstractmethod
     def parse_int(self) -> int:
         """Parse an integer."""
-        pass
+        value = self.parse_nullable_int()
+        if value is None:
+            raise RuntimeError('NA received unexpectedly')
+        return value
 
     @abc.abstractmethod
     def parse_nullable_int(self) -> int | None:  # noqa: D102

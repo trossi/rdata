@@ -36,9 +36,6 @@ class ParserASCII(Parser):
         """Read a line without trailing \\n"""
         return self.file.readline()[:-1]
 
-    def parse_int(self) -> int:  # noqa: D102
-        return int(self._readline())
-
     def parse_nullable_int(self) -> int | None:  # noqa: D102
         value = self._readline()
         if value == R_INT_NA:

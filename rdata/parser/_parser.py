@@ -272,7 +272,11 @@ def _str_internal(
 
         return string
 
-    string += f"{indent_spaces}{obj.info.type}\n"
+    info = obj.info
+    string += f"{indent_spaces}{info.type}"
+    if info.gp != 0:
+        string += f"(gp={info.gp})"
+    string += "\n"
 
     if obj.tag:
         tag_string = _str_internal(

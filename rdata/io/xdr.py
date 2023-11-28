@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import io
+
 from typing import (
     Any,
     BinaryIO,
@@ -116,7 +118,7 @@ class WriterXDR(Writer):
 
     def __init__(
         self,
-        file: BytesIO,
+        file: io.BytesIO,
     ) -> None:
         self.file = file
 

@@ -332,6 +332,8 @@ def convert_symbol(
 def convert_array(
     r_array: parser.RObject,
     attrs: Mapping[str, Any] | None = None,
+    *,
+    numpy_only: bool = False,
 ) -> np.ndarray[Any, Any] | xarray.DataArray:
     """
     Convert a R array to a Numpy ndarray or a Xarray DataArray.
@@ -342,6 +344,7 @@ def convert_array(
     Args:
         r_array: R array.
         attrs: Attributes of the array.
+        numpy_only: If True, Xarray DataArray is never returned.
 
     Returns:
         Array.
@@ -368,6 +371,9 @@ def convert_array(
     if shape is not None:
         # R matrix order is like FORTRAN
         value = np.reshape(value, shape, order="F")
+
+    if numpy_only:
+        return value
 
     dimension_names = None
     coords = None
@@ -630,6 +636,8 @@ class SimpleConverter(Converter):
         force_default_encoding:
             Use the default encoding even if the strings specify other
             encoding.
+        enable_xarray:
+            If True, use Xarray DataArrays.
         global_environment: Global environment to use. By default is an empty
             environment.
         base_environment: Base environment to use. By default is an empty
@@ -643,6 +651,7 @@ class SimpleConverter(Converter):
         *,
         default_encoding: str | None = None,
         force_default_encoding: bool = False,
+        enable_xarray: bool = True,
         global_environment: MutableMapping[str, Any] | None = None,
         base_environment: MutableMapping[str, Any] | None = None,
     ) -> None:
@@ -650,6 +659,7 @@ class SimpleConverter(Converter):
         self.constructor_dict = constructor_dict
         self.default_encoding = default_encoding
         self.force_default_encoding = force_default_encoding
+        self.enable_xarray = enable_xarray
         self.global_environment = REnvironment(
             {} if global_environment is None
             else global_environment,
@@ -762,7 +772,8 @@ class SimpleConverter(Converter):
         }:
 
             # Return the internal array
-            value = convert_array(obj, attrs=attrs)
+            value = convert_array(obj, attrs=attrs,
+                                  numpy_only=not self.enable_xarray)
 
         elif obj.info.type == parser.RObjectType.STR:
 

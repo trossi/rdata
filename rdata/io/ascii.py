@@ -23,7 +23,7 @@ R_INT_NA = 'NA' # noqa: WPS432
 
 
 class ParserASCII(Parser):
-    """Parser used when the file is in ASCII format."""
+    """Parser for files in ASCII format."""
 
     def __init__(
         self,
@@ -63,7 +63,7 @@ class ParserASCII(Parser):
 
 
 class WriterASCII(Writer):
-    """Writer for ASCII format files."""
+    """Writer for files in ASCII format."""
 
     def __init__(
         self,

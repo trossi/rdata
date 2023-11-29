@@ -25,7 +25,7 @@ R_INT_NA = -2**31  # noqa: WPS432
 
 
 class ParserXDR(Parser):
-    """Parser used when the integers and doubles are in XDR format."""
+    """Parser for files in XDR format."""
 
     def __init__(
         self,
@@ -114,7 +114,7 @@ def flatten_nullable_int_array(array):
 
 
 class WriterXDR(Writer):
-    """Writer for XDR format files."""
+    """Writer for files in XDR format."""
 
     def __init__(
         self,

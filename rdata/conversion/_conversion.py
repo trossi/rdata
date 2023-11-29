@@ -365,6 +365,8 @@ def convert_array(
     r_array: RObject,
     conversion_function: ConversionFunction,
     attrs: StrMap | None = None,
+    *,
+    numpy_only: bool = False,
 ) -> np.ndarray | xarray.DataArray:
     """
     Convert a R array to a Numpy ndarray or a Xarray DataArray.
@@ -379,6 +381,8 @@ def convert_array(
     conversion_function: Callable
         Conversion function to apply to the attributes of the array.
         By default is the identity function.
+    numpy_only: bool
+        If True, Xarray DataArray is never returned.
 
     Returns
     -------
@@ -407,6 +411,9 @@ def convert_array(
     if shape is not None:
         # R matrix order is like FORTRAN
         value = np.reshape(value, shape, order='F')
+
+    if numpy_only:
+        return value
 
     dimension_names = None
     coords = None
@@ -668,6 +675,7 @@ class SimpleConverter(Converter):
         *,
         default_encoding: str | None = None,
         force_default_encoding: bool = False,
+        enable_xarray: bool = True,
         global_environment: MutableMapping[str | bytes, Any] | None = None,
         base_environment: MutableMapping[str | bytes, Any] | None = None,
     ) -> None:
@@ -675,6 +683,7 @@ class SimpleConverter(Converter):
         self.constructor_dict = constructor_dict
         self.default_encoding = default_encoding
         self.force_default_encoding = force_default_encoding
+        self.enable_xarray = enable_xarray
         self.global_environment = REnvironment(
             {} if global_environment is None
             else global_environment,
@@ -783,7 +792,8 @@ class SimpleConverter(Converter):
         }:
 
             # Return the internal array
-            value = convert_array(obj, self._convert_next, attrs=attrs)
+            value = convert_array(obj, self._convert_next, attrs=attrs,
+                                  numpy_only=not self.enable_xarray)
 
         elif obj.info.type == parser.RObjectType.STR:
 

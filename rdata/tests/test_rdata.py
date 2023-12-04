@@ -54,7 +54,7 @@ class SimpleTests(unittest.TestCase):  # noqa:WPS214
         data = converted["test_nullable_logical"]
         np.testing.assert_array_equal(
             data.data,
-            np.array([True, False, True]),
+            np.array([True, False, False]),
         )
         np.testing.assert_array_equal(
             data.mask,
@@ -71,7 +71,7 @@ class SimpleTests(unittest.TestCase):  # noqa:WPS214
         data = converted["test_nullable_int"]
         np.testing.assert_array_equal(
             data.data,
-            np.array([313, -12, -2**31]),
+            np.array([313, -12, 0]),
         )
         np.testing.assert_array_equal(
             data.mask,

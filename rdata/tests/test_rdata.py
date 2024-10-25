@@ -808,6 +808,7 @@ class SimpleTests(unittest.TestCase):
         data = rdata.conversion.convert(parsed)
         np.testing.assert_equal(data, [1., 2., 3.])
 
+    @pytest.mark.filterwarnings("ignore:Missing constructor")
     def test_altrep_wrap_real_class_attribute(self) -> None:
         """Test alternative representation of wrap_real with class attribute."""
         # File created in R with

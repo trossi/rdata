@@ -13,7 +13,7 @@ from ._unparser import Unparser
 
 if TYPE_CHECKING:
     import io
-    from typing import Any, Final
+    from typing import Final
 
     import numpy.typing as npt
 

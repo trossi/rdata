@@ -108,10 +108,14 @@ def test_convert_to_r(fname: str, expand_altrep: bool) -> None:  # noqa: FBT001
     with (TESTDATA_PATH / fname).open("rb") as f:
         # Skip test files without unique R->py->R transformation
         if fname in [
-            "test_encodings.rda",     # encoding not kept in Python
-            "test_encodings_v3.rda",  # encoding not kept in Python
-            "test_list_attrs.rda",    # attributes not kept in Python
-            "test_file.rda",          # attributes not kept in Python
+            # encoding not kept in Python
+            "test_encodings.rda",
+            "test_encodings_v3.rda",
+            # attributes not kept in Python
+            "test_list_attrs.rda",
+            "test_file.rda",
+            "test_altrep_wrap_real_attributes.rds",
+            "test_altrep_wrap_real_class_attribute.rds",
         ]:
             pytest.skip("ambiguous R->py->R transformation")
 

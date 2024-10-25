@@ -454,6 +454,9 @@ class SimpleTests(unittest.TestCase):
 
     def test_dataframe(self) -> None:
         """Test dataframe conversion."""
+        # Files created in R with
+        # test_dataframe = data.frame(class=factor(c("a", "b", "b")), value=c(1L, 2L, 3L)); save(test_dataframe, file="test_dataframe.rda", version=2)  # noqa: E501
+        # test_dataframe = data.frame(class=factor(c("a", "b", "b")), value=c(1L, 2L, 3L)); save(test_dataframe, file="test_dataframe_v3.rda")  # noqa: E501
         for f in ("test_dataframe.rda", "test_dataframe_v3.rda"):
             with self.subTest(file=f):
                 data = rdata.read_rda(TESTDATA_PATH / f)
@@ -476,6 +479,9 @@ class SimpleTests(unittest.TestCase):
 
     def test_dataframe_rds(self) -> None:
         """Test dataframe conversion."""
+        # Files created in R with
+        # df = data.frame(class=factor(c("a", "b", "b")), value=c(1L, 2L, 3L)); saveRDS(df, file="test_dataframe.rds", version=2)  # noqa: E501
+        # df = data.frame(class=factor(c("a", "b", "b")), value=c(1L, 2L, 3L)); saveRDS(df, file="test_dataframe_v3.rds")  # noqa: E501
         for f in ("test_dataframe.rds", "test_dataframe_v3.rds"):
             with self.subTest(file=f):
                 data = rdata.read_rds(TESTDATA_PATH / f)

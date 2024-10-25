@@ -373,11 +373,6 @@ class ConverterFromPythonToR:
         self._references: dict[str | None, tuple[int, RObject | None]] \
             = {None: (0, None)}
 
-        # In test files the order in which dataframe attributes are written varies.
-        # R can read files with attributes in any order, but this variable
-        # is used in tests to change the attribute order to match with the test file.
-        self.df_attr_order: list[str] | None = None
-
 
     def convert_to_r_data(self,
         data: Any,  # noqa: ANN401
@@ -604,11 +599,6 @@ class ConverterFromPythonToR:
             if r_type is None:
                 msg = f"type {type(data)} not implemented"
                 raise NotImplementedError(msg)
-
-            # Fix for test files where dataframe attribute order varies
-            assert isinstance(attributes, dict)
-            if isinstance(data, pd.DataFrame) and self.df_attr_order is not None:
-                attributes = {k: attributes[k] for k in self.df_attr_order}
 
         if attributes is not None:
             is_object = "class" in attributes

@@ -138,13 +138,6 @@ def test_convert_to_r(fname: str, expand_altrep: bool) -> None:  # noqa: FBT001
             format_version=r_data.versions.format,
             r_version_serialized=r_data.versions.serialized,
         )
-        if fname in [
-            "test_dataframe.rda",
-            "test_dataframe.rds",
-            "test_dataframe_v3.rda",
-            "test_dataframe_v3.rds",
-        ]:
-            converter.df_attr_order = ["names", "row.names", "class"]
 
         try:
             new_r_data = converter.convert_to_r_data(py_data, file_type=file_type)

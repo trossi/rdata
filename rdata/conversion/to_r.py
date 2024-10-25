@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import string
 from types import MappingProxyType
 from typing import TYPE_CHECKING
@@ -26,7 +27,7 @@ from . import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Callable, Mapping
     from typing import Any, Final, Literal, Protocol
 
     import numpy.typing as npt
@@ -44,16 +45,11 @@ if TYPE_CHECKING:
         ) -> RObject:
             """Convert Python data to R object."""
 
-    class ConstructorFunction(Protocol):
-        """Protocol for Py-to-R constructor function."""
+    ConstructorReturnValue = tuple[RObjectType, Any, dict[str, Any]]
+    ConstructorFunction1 = Callable[[Any], ConstructorReturnValue]
+    ConstructorFunction2 = Callable[[Any, Converter], ConstructorReturnValue]
 
-        def __call__(self,
-            data: Any,  # noqa: ANN401
-            converter: Converter,
-        ) -> tuple[RObjectType, Any, dict[str, Any]]:
-            """Convert Python object to R object components."""
-
-    ConstructorDict = Mapping[type, ConstructorFunction]
+    ConstructorDict = Mapping[type, ConstructorFunction1 | ConstructorFunction2]
 
 
 # Default values for RVersions object
@@ -71,14 +67,12 @@ R_MINIMUM_VERSION_WITH_ALTREP: Final[int] = 3
 
 def categorical_constructor(
     data: pd.Categorical,
-    converter: Converter,  # noqa: ARG001
-) -> tuple[RObjectType, Any, dict[str, Any]]:
+) -> ConstructorReturnValue:
     """
     Construct R object components from pandas categorical.
 
     Args:
         data: Pandas categorical.
-        converter: Python-to-R converter.
 
     Returns:
         Components of the R object.
@@ -96,7 +90,7 @@ def categorical_constructor(
 def dataframe_constructor(
     data: pd.DataFrame,
     converter: Converter,
-) -> tuple[RObjectType, Any, dict[str, Any]]:
+) -> ConstructorReturnValue:
     """
     Construct R object components from pandas dataframe.
 
@@ -594,7 +588,16 @@ class ConverterFromPythonToR:
             # Check available constructors
             for t, constructor in self.constructor_dict.items():
                 if isinstance(data, t):
-                    r_type, r_value, attributes = constructor(data, self)
+                    n_params = len(inspect.signature(constructor).parameters)
+                    args: tuple[Any] | tuple[Any, Converter]
+                    if n_params == 1:
+                        args = (data,)
+                    elif n_params == 2:  # noqa: PLR2004
+                        args = (data, self)
+                    else:
+                        msg = "constructor function has wrong call signature"
+                        raise ValueError(msg)
+                    r_type, r_value, attributes = constructor(*args)
                     break
 
             if r_type is None:

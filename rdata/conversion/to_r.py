@@ -35,19 +35,21 @@ if TYPE_CHECKING:
 
     Encoding = Literal["utf-8", "cp1252"]
 
-    class ConversionFunction(Protocol):
-        """Protocol for Py-to-R conversion function."""
+    class Converter(Protocol):
+        """Protocol for class converting Python objects to R objects."""
 
-        def __call__(self, data: Any) -> RObject:  # noqa: ANN401
-            """Convert Python object to R object."""
-
+        def convert_to_r_object(
+            self,
+            data: Any,  # noqa: ANN401
+        ) -> RObject:
+            """Convert Python data to R object."""
 
     class ConstructorFunction(Protocol):
         """Protocol for Py-to-R constructor function."""
 
         def __call__(self,
             data: Any,  # noqa: ANN401
-            convert_to_r_object: ConversionFunction,
+            converter: Converter,
         ) -> tuple[RObjectType, Any, dict[str, Any]]:
             """Convert Python object to R object components."""
 
@@ -69,14 +71,14 @@ R_MINIMUM_VERSION_WITH_ALTREP: Final[int] = 3
 
 def categorical_constructor(
     data: pd.Categorical,
-    convert_to_r_object: ConversionFunction,  # noqa: ARG001
+    converter: Converter,  # noqa: ARG001
 ) -> tuple[RObjectType, Any, dict[str, Any]]:
     """
     Construct R object components from pandas categorical.
 
     Args:
         data: Pandas categorical.
-        convert_to_r_object: Conversion function.
+        converter: Python-to-R converter.
 
     Returns:
         Components of the R object.
@@ -93,14 +95,14 @@ def categorical_constructor(
 
 def dataframe_constructor(
     data: pd.DataFrame,
-    convert_to_r_object: ConversionFunction,
+    converter: Converter,
 ) -> tuple[RObjectType, Any, dict[str, Any]]:
     """
     Construct R object components from pandas dataframe.
 
     Args:
         data: Pandas dataframe.
-        convert_to_r_object: Conversion function.
+        converter: Python-to-R converter.
 
     Returns:
         Components of the R object.
@@ -119,7 +121,7 @@ def dataframe_constructor(
             array = pd_array
         else:
             array = convert_pd_array_to_np_array(pd_array)
-        r_series = convert_to_r_object(array)
+        r_series = converter.convert_to_r_object(array)
         r_value.append(r_series)
 
     index = data.index
@@ -592,8 +594,7 @@ class ConverterFromPythonToR:
             # Check available constructors
             for t, constructor in self.constructor_dict.items():
                 if isinstance(data, t):
-                    r_type, r_value, attributes \
-                        = constructor(data, self.convert_to_r_object)
+                    r_type, r_value, attributes = constructor(data, self)
                     break
 
             if r_type is None:

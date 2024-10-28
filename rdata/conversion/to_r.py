@@ -38,14 +38,15 @@ if TYPE_CHECKING:
 
     class Converter(Protocol):
         """Protocol for class converting Python objects to R objects."""
+        format_version: int
 
-        def convert_to_r_object(
-            self,
-            data: Any,  # noqa: ANN401
-        ) -> RObject:
+        def convert_to_r_sym(self, name: str) -> RObject:
+            """Convert string to R symbol."""
+
+        def convert_to_r_object(self, data: Any) -> RObject:  # noqa: ANN401
             """Convert Python data to R object."""
 
-    ConstructorReturnValue = tuple[RObjectType, Any, dict[str, Any]]
+    ConstructorReturnValue = tuple[RObjectType, Any, dict[str, Any] | None]
     ConstructorFunction1 = Callable[[Any], ConstructorReturnValue]
     ConstructorFunction2 = Callable[[Any, Converter], ConstructorReturnValue]
 
@@ -131,7 +132,7 @@ def dataframe_constructor(
                 fill_value=R_INT_NA,
             )
         else:
-            row_names = range(index.start, index.stop, index.step)
+            row_names = index
     elif isinstance(index, pd.Index):
         if (index.dtype == "object"
             or np.issubdtype(str(index.dtype), np.integer)):
@@ -151,9 +152,54 @@ def dataframe_constructor(
     return r_type, r_value, attributes
 
 
+def rangeindex_constructor(
+    data: pd.RangeIndex,
+    converter: Converter,
+) -> ConstructorReturnValue:
+    """
+    Construct R object components from pandas rangeindex.
+
+    Args:
+        data: Pandas rangeindex.
+        converter: Python-to-R converter.
+
+    Returns:
+        Components of the R object.
+    """
+    assert isinstance(data, pd.RangeIndex)
+    if converter.format_version < R_MINIMUM_VERSION_WITH_ALTREP:
+        # ALTREP support is from R version 3.5.0
+        # (minimum version for format version 3)
+        return RObjectType.INT, np.array(data), None
+
+    assert isinstance(data.step, int)
+    if data.step != 1:
+        # R supports compact sequences only with step 1;
+        # convert the range to an array of values
+        return RObjectType.INT, np.array(data), None
+
+    r_type = RObjectType.ALTREP
+    r_value = (
+        build_r_list([
+            converter.convert_to_r_sym("compact_intseq"),
+            converter.convert_to_r_sym("base"),
+            converter.convert_to_r_object(RObjectType.INT.value),
+        ]),
+        converter.convert_to_r_object(np.array([
+            len(data),
+            data.start,
+            data.step,
+        ], dtype=float)),
+        converter.convert_to_r_object(None),
+    )
+    attributes = None
+    return r_type, r_value, attributes
+
+
 DEFAULT_CONSTRUCTOR_DICT: Final[ConstructorDict] = MappingProxyType({
     pd.Categorical: categorical_constructor,
     pd.DataFrame: dataframe_constructor,
+    pd.RangeIndex: rangeindex_constructor,
 })
 
 
@@ -557,32 +603,6 @@ class ConverterFromPythonToR:
 
         elif isinstance(data, (bool, int, float, complex, str, bytes)):
             return self.convert_to_r_object(np.array(data))
-
-        elif isinstance(data, range):
-            if self.format_version < R_MINIMUM_VERSION_WITH_ALTREP:
-                # ALTREP support is from R version 3.5.0
-                # (minimum version for format version 3)
-                return self.convert_to_r_object(np.array(data))
-
-            if data.step != 1:
-                # R supports compact sequences only with step 1;
-                # convert the range to an array of values
-                return self.convert_to_r_object(np.array(data))
-
-            r_type = RObjectType.ALTREP
-            r_value = (
-                build_r_list([
-                    self.convert_to_r_sym("compact_intseq"),
-                    self.convert_to_r_sym("base"),
-                    self.convert_to_r_object(RObjectType.INT.value),
-                ]),
-                self.convert_to_r_object(np.array([
-                    len(data),
-                    data.start,
-                    data.step,
-                ], dtype=float)),
-                self.convert_to_r_object(None),
-            )
 
         else:
             # Check available constructors

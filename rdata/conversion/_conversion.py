@@ -14,8 +14,6 @@ import pandas as pd
 import xarray
 from typing_extensions import override
 
-from rdata.parser._parser import get_altrep_name
-
 from .. import parser
 
 ConversionFunction = Callable[[Union[parser.RData, parser.RObject]], Any]
@@ -394,38 +392,6 @@ def convert_array(
         )
 
     return value  # type: ignore [no-any-return]
-
-
-def convert_altrep_to_range(
-    r_altrep: parser.RObject,
-) -> range:
-    """
-    Convert a R altrep to range object.
-
-    Args:
-        r_altrep: R altrep object
-
-    Returns:
-        Range object.
-    """
-    if r_altrep.info.type != parser.RObjectType.ALTREP:
-        msg = "Must receive an altrep object"
-        raise TypeError(msg)
-
-    info, state, attr = r_altrep.value
-    assert attr.info.type == parser.RObjectType.NILVALUE
-
-    altrep_name = get_altrep_name(info)
-
-    if altrep_name != b"compact_intseq":
-        msg = "Only compact integer sequences can be converted to range"
-        raise NotImplementedError(msg)
-
-    n = int(state.value[0])
-    start = int(state.value[1])
-    step = int(state.value[2])
-    stop = start + (n - 1) * step
-    return range(start, stop + 1, step)
 
 
 def _dataframe_column_transform(source: Any) -> Any:  # noqa: ANN401
@@ -871,9 +837,6 @@ class SimpleConverter(Converter):
         elif obj.info.type == parser.RObjectType.NILVALUE:
 
             value = None
-
-        elif obj.info.type == parser.RObjectType.ALTREP:
-            value = convert_altrep_to_range(obj)
 
         else:
             msg = f"Type {obj.info.type} not implemented"

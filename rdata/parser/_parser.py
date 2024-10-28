@@ -369,6 +369,9 @@ class RObject:
             return False
 
         # Compare value field
+        if not isinstance(other.value, type(self.value)):
+            return False
+
         if isinstance(self.value, np.ndarray):
             if not np.array_equal(self.value, other.value, equal_nan=True):
                 return False

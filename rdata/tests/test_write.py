@@ -258,6 +258,34 @@ def test_convert_dataframe_pandas_dtypes() -> None:
     assert r_obj1 == r_obj2
 
 
+def test_convert_dataframe_rangeindex() -> None:
+    """Test converting dataframe with rangeindex."""
+    data = {"data": np.array([10, 20, 30], dtype=np.int32)}
+
+    df1 = pd.DataFrame(data, index=pd.RangeIndex(3))
+    df2 = pd.DataFrame(data, index=pd.Index([0, 1, 2]))
+
+    r_obj1 = convert_python_to_r_object(df1)
+    r_obj2 = convert_python_to_r_object(df2)
+
+    assert str(r_obj1) != str(r_obj2)
+    assert r_obj1 != r_obj2
+
+
+def test_convert_dataframe_rangeindex_flattened() -> None:
+    """Test converting dataframe with rangeindex."""
+    data = {"data": np.array([10, 20, 30], dtype=np.int32)}
+
+    df1 = pd.DataFrame(data, index=pd.RangeIndex(3, 8, 2))
+    df2 = pd.DataFrame(data, index=pd.Index([3, 5, 7]))
+
+    r_obj1 = convert_python_to_r_object(df1)
+    r_obj2 = convert_python_to_r_object(df2)
+
+    assert str(r_obj1) == str(r_obj2)
+    assert r_obj1 == r_obj2
+
+
 @pytest.mark.parametrize("compression", [*valid_compressions, "fail"])
 @pytest.mark.parametrize("file_format", [*valid_formats, None, "fail"])
 @pytest.mark.parametrize("file_type", ["rds", "rda"])

@@ -239,15 +239,16 @@ def test_convert_dataframe_pandas_dtypes() -> None:
         index=range(3),
     )
 
+    index = pd.RangeIndex(3)
     df2 = pd.DataFrame(
         {
-            "int": pd.Series([10, 20, 30], dtype=pd.Int32Dtype()),
-            "float": pd.Series([1.1, 2.2, 3.3], dtype=pd.Float64Dtype()),
-            "string": pd.Series(["x" ,"y", "z"], dtype=pd.StringDtype()),
-            "bool": pd.Series([True, False, True], dtype=pd.BooleanDtype()),
-            "complex": pd.Series([4+5j, 6+7j, 8+9j], dtype=complex),
+            "int": pd.Series([10, 20, 30], dtype=pd.Int32Dtype(), index=index),
+            "float": pd.Series([1.1, 2.2, 3.3], dtype=pd.Float64Dtype(), index=index),
+            "string": pd.Series(["x" ,"y", "z"], dtype=pd.StringDtype(), index=index),
+            "bool": pd.Series([1, 0, 1], dtype=pd.BooleanDtype(), index=index),
+            "complex": pd.Series([4+5j, 6+7j, 8+9j], dtype=complex, index=index),
         },
-        index=pd.RangeIndex(3),
+        index=index,
     )
 
     r_obj1 = convert_python_to_r_object(df1)

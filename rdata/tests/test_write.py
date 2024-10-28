@@ -106,7 +106,7 @@ def test_unparse(fname: str) -> None:
 def test_convert_to_r(fname: str, expand_altrep: bool) -> None:  # noqa: FBT001
     """Test converting Python data to RData object."""
     with (TESTDATA_PATH / fname).open("rb") as f:
-        # Skip test files without unique R->py->R transformation
+        # Skip test files without unique transformation
         if fname in [
             # encoding not kept in Python
             "test_encodings.rda",
@@ -117,7 +117,7 @@ def test_convert_to_r(fname: str, expand_altrep: bool) -> None:  # noqa: FBT001
             "test_altrep_wrap_real_attributes.rds",
             "test_altrep_wrap_real_class_attribute.rds",
         ]:
-            pytest.skip("ambiguous R->py->R transformation")
+            pytest.skip("ambiguous R-to-Python-to-R transformation")
 
         data = decompress_data(f.read())
         file_type, file_format = parse_file_type_and_format(data)

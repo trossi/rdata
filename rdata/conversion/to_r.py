@@ -38,6 +38,7 @@ if TYPE_CHECKING:
 
     class Converter(Protocol):
         """Protocol for class converting Python objects to R objects."""
+
         format_version: int
 
         def convert_to_r_sym(self, name: str) -> RObject:
@@ -122,10 +123,7 @@ def dataframe_constructor(
     index = data.index
     if isinstance(index, pd.RangeIndex):
         assert isinstance(index.start, int)
-        if (index.start == 1
-            and index.stop == data.shape[0] + 1
-            and index.step == 1
-        ):
+        if index.start == 1 and index.stop == data.shape[0] + 1 and index.step == 1:
             row_names = np.ma.array(
                 data=[R_INT_NA, -data.shape[0]],
                 mask=[True, False],
@@ -134,8 +132,7 @@ def dataframe_constructor(
         else:
             row_names = index
     elif isinstance(index, pd.Index):
-        if (index.dtype == "object"
-            or np.issubdtype(str(index.dtype), np.integer)):
+        if index.dtype == "object" or np.issubdtype(str(index.dtype), np.integer):
             row_names = index.to_numpy()
         else:
             msg = f"pd.DataFrame pd.Index {index.dtype} not implemented"
@@ -296,10 +293,11 @@ def build_r_object(
     """
     assert r_type is not None
     reference_id, referenced_object = reference
-    assert ((reference_id == 0)
-            == (referenced_object is None)
-            == (r_type != RObjectType.REF)
-            )
+    assert (
+        (reference_id == 0)
+        == (referenced_object is None)
+        == (r_type != RObjectType.REF)
+    )
     return RObject(
         RObjectInfo(
             r_type,
@@ -308,12 +306,12 @@ def build_r_object(
             tag=tag is not None,
             gp=gp,
             reference=reference_id,
-         ),
-         value,
-         attributes,
-         tag,
-         referenced_object,
-     )
+        ),
+        value,
+        attributes,
+        tag,
+        referenced_object,
+    )
 
 
 def build_r_list(
@@ -393,7 +391,10 @@ class ConverterFromPythonToR:
         r_version_serialized: R version written as the creator of the object.
         constructor_dict: Dictionary mapping Python types to R classes.
     """
-    def __init__(self, *,
+
+    def __init__(
+        self,
+        *,
         encoding: Encoding = "utf-8",
         format_version: int = DEFAULT_FORMAT_VERSION,
         r_version_serialized: int = DEFAULT_R_VERSION_SERIALIZED,
@@ -412,11 +413,12 @@ class ConverterFromPythonToR:
         self.format_version = format_version
         self.r_version_serialized = r_version_serialized
         self.constructor_dict = constructor_dict
-        self._references: dict[str | None, tuple[int, RObject | None]] \
-            = {None: (0, None)}
+        self._references: dict[str | None, tuple[int, RObject | None]] = {
+            None: (0, None),
+        }
 
-
-    def convert_to_r_data(self,
+    def convert_to_r_data(
+        self,
         data: Any,  # noqa: ANN401
         *,
         file_type: FileType = "rds",
@@ -451,14 +453,16 @@ class ConverterFromPythonToR:
             R_MINIMUM_VERSIONS[self.format_version],
         )
 
-        extra = (RExtraInfo(self.encoding.upper())
-                 if versions.format >= R_MINIMUM_VERSION_WITH_ENCODING
-                 else RExtraInfo(None))
+        extra = (
+            RExtraInfo(self.encoding.upper())
+            if versions.format >= R_MINIMUM_VERSION_WITH_ENCODING
+            else RExtraInfo(None)
+        )
 
         return RData(versions, extra, r_object)
 
-
-    def convert_to_r_attributes(self,
+    def convert_to_r_attributes(
+        self,
         data: dict[str, Any],
     ) -> RObject:
         """
@@ -479,8 +483,8 @@ class ConverterFromPythonToR:
 
         return build_r_list(converted)
 
-
-    def convert_to_r_sym(self,
+    def convert_to_r_sym(
+        self,
         name: str,
     ) -> RObject:
         """
@@ -507,8 +511,8 @@ class ConverterFromPythonToR:
         self._references[name] = (len(self._references), r_object)
         return r_object
 
-
-    def convert_to_r_object(self,  # noqa: C901, PLR0912, PLR0915
+    def convert_to_r_object(  # noqa: C901, PLR0912, PLR0915
+        self,
         data: Any,  # noqa: ANN401
     ) -> RObject:
         """
@@ -583,8 +587,7 @@ class ConverterFromPythonToR:
             elif data.dtype.kind in ["U"]:
                 assert data.ndim == 1
                 r_type = RObjectType.STR
-                r_value = [build_r_char(el, encoding=self.encoding)
-                           for el in data]
+                r_value = [build_r_char(el, encoding=self.encoding) for el in data]
 
             else:
                 r_type = {

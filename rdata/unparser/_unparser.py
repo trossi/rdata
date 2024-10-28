@@ -94,7 +94,8 @@ class Unparser(abc.ABC):
         self._unparse_array_values_raw(array)
 
     @abc.abstractmethod
-    def _unparse_array_values_raw(self,
+    def _unparse_array_values_raw(
+        self,
         array: npt.NDArray[np.int32 | np.float64 | np.complex128],
     ) -> None:
         """Unparse the values of an array as such."""

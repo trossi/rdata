@@ -35,7 +35,7 @@ def build_byte_to_str_map() -> tuple[str, ...]:
         byte_to_str[byte] = escape(bytes([byte]))
 
     # Update mapping for special characters
-    byte_to_str[b'"'[0]] = r'\"'
+    byte_to_str[b'"'[0]] = r"\""
     byte_to_str[b"'"[0]] = r"\'"
     byte_to_str[b"?"[0]] = r"\?"
     byte_to_str[b" "[0]] = r"\040"
@@ -68,7 +68,8 @@ class UnparserASCII(Unparser):
         """Unparse magic bits."""
         self._add_line("A")
 
-    def _unparse_array_values_raw(self,
+    def _unparse_array_values_raw(
+        self,
         array: npt.NDArray[np.int32 | np.float64 | np.complex128],
     ) -> None:
         # Convert complex to pairs of floats

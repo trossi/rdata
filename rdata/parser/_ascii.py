@@ -40,11 +40,10 @@ class ParserASCII(Parser):
         return self.file.readline()[:-1]
 
     def _parse_array_values(
-            self,
-            dtype: npt.DTypeLike,
-            length: int,
+        self,
+        dtype: npt.DTypeLike,
+        length: int,
     ) -> npt.NDArray[Any]:
-
         array = np.empty(length, dtype=dtype)
         value: int | float | complex
 

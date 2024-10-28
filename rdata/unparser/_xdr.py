@@ -27,7 +27,8 @@ class UnparserXDR(Unparser):
         """Unparse magic bits."""
         self.file.write(b"X\n")
 
-    def _unparse_array_values_raw(self,
+    def _unparse_array_values_raw(
+        self,
         array: npt.NDArray[np.int32 | np.float64 | np.complex128],
     ) -> None:
         # Convert to big endian if needed

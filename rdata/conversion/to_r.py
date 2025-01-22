@@ -40,14 +40,16 @@ if TYPE_CHECKING:
 
         format_version: int
 
+        def convert_to_r_attributes(self, data: dict[str, Any]) -> RObject:
+            """Convert dictionary to R attributes list."""
+
         def convert_to_r_sym(self, name: str) -> RObject:
             """Convert string to R symbol."""
 
         def convert_to_r_object(self, data: Any) -> RObject:  # noqa: ANN401
             """Convert Python data to R object."""
 
-    ConstructorReturnValue = tuple[RObjectType, Any, dict[str, Any] | None]
-    ConstructorFunction = Callable[[Any, Converter], ConstructorReturnValue]
+    ConstructorFunction = Callable[[Any, Converter], RObject]
     ConstructorDict = Mapping[type, ConstructorFunction]
 
 
@@ -66,8 +68,8 @@ R_MINIMUM_VERSION_WITH_ALTREP: Final[int] = 3
 
 def categorical_constructor(
     data: pd.Categorical,
-    converter: Converter,  # noqa: ARG001
-) -> ConstructorReturnValue:
+    converter: Converter,
+) -> RObject:
     """
     Construct R object components from pandas categorical.
 
@@ -79,19 +81,23 @@ def categorical_constructor(
         Components of the R object.
     """
     assert isinstance(data, pd.Categorical)
-    r_type = RObjectType.INT
-    r_value = data.codes + 1
-    attributes = {
+    r_attributes = converter.convert_to_r_attributes({
         "levels": data.categories.to_numpy(),
         "class": "factor",
-    }
-    return r_type, r_value, attributes
+    })
+
+    return build_r_object(
+        RObjectType.INT,
+        value=data.codes + 1,
+        is_object=True,
+        attributes=r_attributes,
+    )
 
 
 def dataframe_constructor(
     data: pd.DataFrame,
     converter: Converter,
-) -> ConstructorReturnValue:
+) -> RObject:
     """
     Construct R object components from pandas dataframe.
 
@@ -103,7 +109,6 @@ def dataframe_constructor(
         Components of the R object.
     """
     assert isinstance(data, pd.DataFrame)
-    r_type = RObjectType.VEC
     column_names = []
     r_value = []
     for column, series in data.items():
@@ -140,18 +145,24 @@ def dataframe_constructor(
         msg = f"pd.DataFrame index {type(index)} not implemented"
         raise NotImplementedError(msg)
 
-    attributes = {
+    r_attributes = converter.convert_to_r_attributes({
         "names": np.array(column_names, dtype=np.dtype("U")),
         "class": "data.frame",
         "row.names": row_names,
-    }
-    return r_type, r_value, attributes
+    })
+
+    return build_r_object(
+        RObjectType.VEC,
+        value=r_value,
+        is_object=True,
+        attributes=r_attributes,
+    )
 
 
 def rangeindex_constructor(
     data: pd.RangeIndex,
     converter: Converter,
-) -> ConstructorReturnValue:
+) -> RObject:
     """
     Construct R object components from pandas rangeindex.
 
@@ -166,15 +177,20 @@ def rangeindex_constructor(
     if converter.format_version < R_MINIMUM_VERSION_WITH_ALTREP:
         # ALTREP support is from R version 3.5.0
         # (minimum version for format version 3)
-        return RObjectType.INT, np.array(data), None
+        return build_r_object(
+            RObjectType.INT,
+            value=np.array(data),
+        )
 
     assert isinstance(data.step, int)
     if data.step != 1:
         # R supports compact sequences only with step 1;
         # convert the range to an array of values
-        return RObjectType.INT, np.array(data), None
+        return build_r_object(
+            RObjectType.INT,
+            value=np.array(data),
+        )
 
-    r_type = RObjectType.ALTREP
     r_value = (
         build_r_list([
             converter.convert_to_r_sym("compact_intseq"),
@@ -188,8 +204,11 @@ def rangeindex_constructor(
         ], dtype=float)),
         converter.convert_to_r_object(None),
     )
-    attributes = None
-    return r_type, r_value, attributes
+
+    return build_r_object(
+        RObjectType.ALTREP,
+        value=r_value,
+    )
 
 
 DEFAULT_CONSTRUCTOR_DICT: Final[ConstructorDict] = MappingProxyType({
@@ -610,12 +629,10 @@ class ConverterFromPythonToR:
             # Check available constructors
             for t, constructor in self.constructor_dict.items():
                 if isinstance(data, t):
-                    r_type, r_value, attributes = constructor(data, self)
-                    break
+                    return constructor(data, self)
 
-            if r_type is None:
-                msg = f"type {type(data)} not implemented"
-                raise NotImplementedError(msg)
+            msg = f"type {type(data)} not implemented"
+            raise NotImplementedError(msg)
 
         if attributes is not None:
             is_object = "class" in attributes

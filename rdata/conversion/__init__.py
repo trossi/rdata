@@ -1,4 +1,4 @@
-"""Utilities for converting R objects to Python ones."""
+"""Utilities for converting between R and Python objects."""
 
 from ._conversion import (
     DEFAULT_CLASS_MAP as DEFAULT_CLASS_MAP,

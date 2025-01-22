@@ -5,11 +5,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from .conversion import (
-    DEFAULT_FORMAT_VERSION,
     convert_python_to_r_data,
 )
 from .conversion.to_r import (
     DEFAULT_CONSTRUCTOR_DICT,
+    DEFAULT_FORMAT_VERSION,
 )
 from .unparser import unparse_file
 

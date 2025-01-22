@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import inspect
 import string
 from types import MappingProxyType
 from typing import TYPE_CHECKING
@@ -48,10 +47,8 @@ if TYPE_CHECKING:
             """Convert Python data to R object."""
 
     ConstructorReturnValue = tuple[RObjectType, Any, dict[str, Any] | None]
-    ConstructorFunction1 = Callable[[Any], ConstructorReturnValue]
-    ConstructorFunction2 = Callable[[Any, Converter], ConstructorReturnValue]
-
-    ConstructorDict = Mapping[type, ConstructorFunction1 | ConstructorFunction2]
+    ConstructorFunction = Callable[[Any, Converter], ConstructorReturnValue]
+    ConstructorDict = Mapping[type, ConstructorFunction]
 
 
 # Default values for RVersions object
@@ -69,12 +66,14 @@ R_MINIMUM_VERSION_WITH_ALTREP: Final[int] = 3
 
 def categorical_constructor(
     data: pd.Categorical,
+    converter: Converter,  # noqa: ARG001
 ) -> ConstructorReturnValue:
     """
     Construct R object components from pandas categorical.
 
     Args:
         data: Pandas categorical.
+        converter: Python-to-R converter.
 
     Returns:
         Components of the R object.
@@ -611,16 +610,7 @@ class ConverterFromPythonToR:
             # Check available constructors
             for t, constructor in self.constructor_dict.items():
                 if isinstance(data, t):
-                    n_params = len(inspect.signature(constructor).parameters)
-                    args: tuple[Any] | tuple[Any, Converter]
-                    if n_params == 1:
-                        args = (data,)
-                    elif n_params == 2:  # noqa: PLR2004
-                        args = (data, self)
-                    else:
-                        msg = "constructor function has wrong call signature"
-                        raise ValueError(msg)
-                    r_type, r_value, attributes = constructor(*args)
+                    r_type, r_value, attributes = constructor(data, self)
                     break
 
             if r_type is None:

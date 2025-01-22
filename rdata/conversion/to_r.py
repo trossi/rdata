@@ -80,7 +80,6 @@ def categorical_constructor(
     Returns:
         Components of the R object.
     """
-    assert isinstance(data, pd.Categorical)
     r_attributes = converter.convert_to_r_attributes({
         "levels": data.categories.to_numpy(),
         "class": "factor",
@@ -108,7 +107,6 @@ def dataframe_constructor(
     Returns:
         Components of the R object.
     """
-    assert isinstance(data, pd.DataFrame)
     column_names = []
     r_value = []
     for column, series in data.items():
@@ -173,7 +171,6 @@ def rangeindex_constructor(
     Returns:
         Components of the R object.
     """
-    assert isinstance(data, pd.RangeIndex)
     if converter.format_version < R_MINIMUM_VERSION_WITH_ALTREP:
         # ALTREP support is from R version 3.5.0
         # (minimum version for format version 3)
@@ -516,8 +513,6 @@ class ConverterFromPythonToR:
         Returns:
             R object.
         """
-        assert isinstance(name, str)
-
         # Reference to existing symbol if exists
         if name in self._references:
             reference = self._references[name]

@@ -407,7 +407,8 @@ class ConverterFromPythonToR:
         encoding: Encoding to be used for strings within data.
         format_version: File format version.
         r_version_serialized: R version written as the creator of the object.
-        constructor_dict: Dictionary mapping Python types to R classes.
+        constructor_dict: Dictionary mapping Python classes to
+            functions converting them to R classes.
     """
 
     def __init__(
@@ -425,7 +426,8 @@ class ConverterFromPythonToR:
             encoding: Encoding to be used for strings within data.
             format_version: File format version.
             r_version_serialized: R version written as the creator of the object.
-            constructor_dict: Dictionary mapping Python types to R classes.
+            constructor_dict: Dictionary mapping Python classes to
+                functions converting them to R classes.
         """
         self.encoding = encoding
         self.format_version = format_version
@@ -665,7 +667,8 @@ def convert_python_to_r_data(
         encoding: Encoding to be used for strings within data.
         format_version: File format version.
         r_version_serialized: R version written as the creator of the object.
-        constructor_dict: Dictionary mapping Python types to R classes.
+        constructor_dict: Dictionary mapping Python classes to
+            functions converting them to R classes.
         file_type: File type.
 
     Returns:
@@ -698,7 +701,8 @@ def convert_python_to_r_object(
         encoding: Encoding to be used for strings within data.
         format_version: File format version.
         r_version_serialized: R version written as the creator of the object.
-        constructor_dict: Dictionary mapping Python types to R classes.
+        constructor_dict: Dictionary mapping Python classes to
+            functions converting them to R classes.
 
     Returns:
         Corresponding RObject object.

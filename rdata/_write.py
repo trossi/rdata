@@ -42,7 +42,8 @@ def write_rds(
         compression: Compression.
         encoding: Encoding to be used for strings within data.
         format_version: File format version.
-        constructor_dict: Dictionary mapping Python types to R classes.
+        constructor_dict: Dictionary mapping Python classes to
+            functions converting them to R classes.
 
     See Also:
         :func:`write_rda`: Similar function that writes an RDA or RDATA file.
@@ -94,7 +95,8 @@ def write_rda(
         compression: Compression.
         encoding: Encoding to be used for strings within data.
         format_version: File format version.
-        constructor_dict: Dictionary mapping Python types to R classes.
+        constructor_dict: Dictionary mapping Python classes to
+            functions converting them to R classes.
 
     See Also:
         :func:`write_rds`: Similar function that writes an RDS file.

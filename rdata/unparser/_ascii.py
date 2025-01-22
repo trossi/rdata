@@ -93,8 +93,7 @@ class UnparserASCII(Unparser):
                     line = "-Inf"
                 else:
                     line = str(value)
-                    if line.endswith(".0"):
-                        line = line[:-2]
+                    line = line.removesuffix(".0")
 
             else:
                 msg = f"Unknown dtype: {array.dtype}"

@@ -126,6 +126,7 @@ def dataframe_constructor(
     if isinstance(index, pd.RangeIndex):
         assert isinstance(index.start, int)
         if index.start == 1 and index.stop == data.shape[0] + 1 and index.step == 1:
+            # Construct default row names stored as [R_INT_NA, -len]
             row_names = np.ma.array(
                 data=[R_INT_NA, -data.shape[0]],
                 mask=[True, False],

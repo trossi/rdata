@@ -209,7 +209,7 @@ def rangeindex_constructor(
     )
 
 
-DEFAULT_CONSTRUCTOR_DICT: Final[ConstructorDict] = MappingProxyType({
+DEFAULT_CLASS_MAP: Final[ConstructorDict] = MappingProxyType({
     pd.Categorical: categorical_constructor,
     pd.DataFrame: dataframe_constructor,
     pd.RangeIndex: rangeindex_constructor,
@@ -415,7 +415,7 @@ class ConverterFromPythonToR:
         encoding: Encoding = "utf-8",
         format_version: int = DEFAULT_FORMAT_VERSION,
         r_version_serialized: int = DEFAULT_R_VERSION_SERIALIZED,
-        constructor_dict: ConstructorDict = DEFAULT_CONSTRUCTOR_DICT,
+        constructor_dict: ConstructorDict = DEFAULT_CLASS_MAP,
     ) -> None:
         """
         Init class.
@@ -652,7 +652,7 @@ def convert_python_to_r_data(
     encoding: Encoding = "utf-8",
     format_version: int = DEFAULT_FORMAT_VERSION,
     r_version_serialized: int = DEFAULT_R_VERSION_SERIALIZED,
-    constructor_dict: ConstructorDict = DEFAULT_CONSTRUCTOR_DICT,
+    constructor_dict: ConstructorDict = DEFAULT_CLASS_MAP,
     file_type: FileType = "rds",
 ) -> RData:
     """
@@ -687,7 +687,7 @@ def convert_python_to_r_object(
     encoding: Encoding = "utf-8",
     format_version: int = DEFAULT_FORMAT_VERSION,
     r_version_serialized: int = DEFAULT_R_VERSION_SERIALIZED,
-    constructor_dict: ConstructorDict = DEFAULT_CONSTRUCTOR_DICT,
+    constructor_dict: ConstructorDict = DEFAULT_CLASS_MAP,
 ) -> RObject:
     """
     Convert Python data to R object.

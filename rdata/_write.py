@@ -8,7 +8,7 @@ from .conversion import (
     convert_python_to_r_data,
 )
 from .conversion.to_r import (
-    DEFAULT_CONSTRUCTOR_DICT,
+    DEFAULT_CLASS_MAP,
     DEFAULT_FORMAT_VERSION,
 )
 from .unparser import unparse_file
@@ -29,7 +29,7 @@ def write_rds(
     compression: Compression = "gzip",
     encoding: Encoding = "utf-8",
     format_version: int = DEFAULT_FORMAT_VERSION,
-    constructor_dict: ConstructorDict = DEFAULT_CONSTRUCTOR_DICT,
+    constructor_dict: ConstructorDict = DEFAULT_CLASS_MAP,
 ) -> None:
     """
     Write an RDS file.
@@ -82,7 +82,7 @@ def write_rda(
     compression: Compression = "gzip",
     encoding: Encoding = "utf-8",
     format_version: int = DEFAULT_FORMAT_VERSION,
-    constructor_dict: ConstructorDict = DEFAULT_CONSTRUCTOR_DICT,
+    constructor_dict: ConstructorDict = DEFAULT_CLASS_MAP,
 ) -> None:
     """
     Write an RDA or RDATA file.
